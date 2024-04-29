@@ -10,15 +10,15 @@ import lombok.NoArgsConstructor;
 
 
 public class ProgramTVDTO {
-	
+
 	private String name;
 	private String schedule;
 	private String day;
 	private int duration;
 	private Long channelId;
-	
-	
-	
+
+
+
 	//Getters
 	public String getName() {
 		return name;
@@ -35,7 +35,7 @@ public class ProgramTVDTO {
 	public Long getChannelId() {
 		return channelId;
 	}
-	
-	
+
+
 
 }//programDTO
