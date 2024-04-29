@@ -16,14 +16,12 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Table (name = "programs")
+@Table (name = "program")
 
 public class ProgramTV {
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	
-	@Column(nullable = false)
 	private Long id;
 	
 	@Column(nullable = false)
@@ -75,5 +73,42 @@ public class ProgramTV {
 		this.channelId = id;
 	}
 
+
+	public Long getChannelId() {
+		return channelId;
+	}
+
+
+	public void setChannelId(Long channelId) {
+		this.channelId = channelId;
+	}
+
+
+	public Long getId() {
+		return id;
+	}
+
+
+	public String getName() {
+		return name;
+	}
+
+
+	public String getSchedule() {
+		return schedule;
+	}
+
+
+	public String getDay() {
+		return day;
+	}
+
+
+	public int getDuration() {
+		return duration;
+	}
+
+
+	
 	
 }//Program

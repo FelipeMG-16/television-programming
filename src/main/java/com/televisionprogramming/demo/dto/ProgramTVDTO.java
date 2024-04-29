@@ -15,7 +15,7 @@ public class ProgramTVDTO {
 	private String schedule;
 	private String day;
 	private int duration;
-	private int channelId;
+	private Long channelId;
 	
 	
 	
@@ -32,7 +32,7 @@ public class ProgramTVDTO {
 	public int getDuration() {
 		return duration;
 	}
-	public int getChannelId() {
+	public Long getChannelId() {
 		return channelId;
 	}
 	

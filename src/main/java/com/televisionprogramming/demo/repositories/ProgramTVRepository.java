@@ -12,20 +12,15 @@ import java.util.List;
 @Repository
 public interface ProgramTVRepository extends JpaRepository<ProgramTV, Long> {
 
-    boolean existsByScheduleAndChannelId(String schedule, int channelId);
-
-    List<ProgramTV> findByChannelId(Long channelId);
-
     @Query("SELECT p FROM ProgramTV p WHERE p.channelId = :channelId " +
-           "AND ((p.schedule BETWEEN :inicio AND :fin) OR " +
-           "(:inicio BETWEEN p.schedule AND p.scheduleEnd))")
+           "AND (p.schedule BETWEEN :startTime AND :endTime)")
     List<ProgramTV> findProgramsOverlappingByChannel(
             @Param("channelId") Long channelId,
-            @Param("inicio") String inicio,
-            @Param("fin") String fin
+            @Param("startTime") String startTime,
+            @Param("endTime") String endTime
     );
 
- 
+    boolean existsByScheduleBetweenAndChannelIdAndIdNot(String startTime, String endTime, Long channelId, Long id);
 
-	boolean existsByHorarioAndCanalIdAndIdNot(String schedule, int channelId, Long id);
+    boolean existsByScheduleAndChannelId(String schedule, Long channelId);
 }
