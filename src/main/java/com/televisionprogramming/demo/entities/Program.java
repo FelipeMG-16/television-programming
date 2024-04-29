@@ -35,5 +35,4 @@ public class Program {
 	@Column(nullable = false)
 	private int canal;
 	
-	
 }//Program
