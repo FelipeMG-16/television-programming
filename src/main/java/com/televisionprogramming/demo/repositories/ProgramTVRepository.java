@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 import com.televisionprogramming.demo.entities.ProgramTV;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ProgramTVRepository extends JpaRepository<ProgramTV, Long> {
@@ -23,4 +24,13 @@ public interface ProgramTVRepository extends JpaRepository<ProgramTV, Long> {
     boolean existsByScheduleBetweenAndChannelIdAndIdNot(String startTime, String endTime, Long channelId, Long id);
 
     boolean existsByScheduleAndChannelId(String schedule, Long channelId);
+    
+ // Consulta para encontrar todos los programas de un canal específico
+    List<ProgramTV> findByChannelId(Long channelId);
+
+    // Consulta para encontrar un programa por ID de canal y nombre del programa
+    Optional<ProgramTV> findByChannelIdAndName(Long channelId, String name);
+
+    // Consulta para verificar si existe algún programa en un canal específico en un horario dado
+    boolean existsByChannelIdAndSchedule(Long channelId, String schedule);
 }

@@ -9,18 +9,22 @@ import com.televisionprogramming.demo.dto.ProgramTVDTO;
 import com.televisionprogramming.demo.entities.ProgramTV;
 import com.televisionprogramming.demo.services.ProgramTVService;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+
 import java.util.List;
 import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/program")
+
+
 public class ProgramTVController {
 
     @Autowired
     private ProgramTVService programTVService;
     
     
-
     @PostMapping
     public ResponseEntity<String> addProgram(@RequestBody ProgramTVDTO program) {
         try {
@@ -32,7 +36,6 @@ public class ProgramTVController {
     }
     
     
-
     @PutMapping("/{id}")
     public ResponseEntity<String> modifyProgram(@PathVariable Long id, @RequestBody ProgramTVDTO program) {
         try {
@@ -43,7 +46,6 @@ public class ProgramTVController {
         }
     }
 
-    
     
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteProgram(@PathVariable Long id) {
@@ -56,7 +58,6 @@ public class ProgramTVController {
     }
 
     
-    
     @GetMapping
     public ResponseEntity<List<ProgramTV>> consultPrograms() {
         List<ProgramTV> programs = programTVService.consultPrograms();
@@ -65,14 +66,12 @@ public class ProgramTVController {
     
     
     
-
     @GetMapping("/channel/{channelId}")
-    public ResponseEntity<Optional<ProgramTV>> consultarProgramasPorCanal(@PathVariable Long channelId) {
-        Optional<ProgramTV> programs = programTVService.consultProgramsByChannel(channelId);
+    public ResponseEntity<List<ProgramTV>> consultProgramsByChannel(@PathVariable Long channelId) {
+        List<ProgramTV> programs = programTVService.consultProgramsByChannel(channelId);
         return ResponseEntity.ok(programs);
     }
 
-    
     
     
     @GetMapping("/channel/{channelId}/overlaps")
@@ -84,11 +83,11 @@ public class ProgramTVController {
         try {
             List<ProgramTV> overlappingPrograms = programTVService.consultOverlapsByChannel(channelId, inicio, fin);
             if (!overlappingPrograms.isEmpty()) {
-                return ResponseEntity.badRequest().body("Existen programas solapados en el canal.");
+                return ResponseEntity.badRequest().body("There are overlapping programs in the channel.");
             }
-            return ResponseEntity.ok("No existen programas solapados en el canal.");
+            return ResponseEntity.ok("There are no overlapping programs in the channel.");
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al consultar solapamientos: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error when querying overlaps: " + e.getMessage());
         }
     }
 }

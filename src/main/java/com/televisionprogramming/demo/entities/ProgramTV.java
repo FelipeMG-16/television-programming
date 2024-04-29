@@ -19,29 +19,29 @@ import lombok.NoArgsConstructor;
 @Table (name = "program")
 
 public class ProgramTV {
-	
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-	
+
 	@Column(nullable = false)
 	private String name;
-	
+
 	@Column(nullable = false)
 	private String schedule;
-	
+
 	@Column(nullable = false)
 	private String day;
-	
+
 	@Column(nullable = false)
 	private int duration;
-	
+
 	@Column(nullable = false)
 	private Long channelId;
 
 
-	
-	
+
+
 
 
 	//Setters
@@ -109,6 +109,6 @@ public class ProgramTV {
 	}
 
 
-	
-	
+
+
 }//Program

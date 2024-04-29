@@ -20,7 +20,7 @@ public class ProgramTVService {
 
     public void addProgram(ProgramTVDTO programDTO) {
         if (programTVRepository.existsByScheduleAndChannelId(programDTO.getSchedule(), programDTO.getChannelId())) {
-            throw new IllegalArgumentException("No se puede agregar el programa porque hay un solapamiento de horario en el mismo canal");
+            throw new IllegalArgumentException("The program cannot be added because ther is a schedule overlap in the same channel");
         }
 
         ProgramTV program = new ProgramTV();
@@ -34,28 +34,73 @@ public class ProgramTVService {
     }
 
     public void modifyProgram(Long id, ProgramTVDTO programDTO) {
-        if (!programTVRepository.existsById(id)) {
+        // Verificar si el programa existe
+        Optional<ProgramTV> existingProgramOpt = programTVRepository.findById(id);
+        if (!existingProgramOpt.isPresent()) {
             throw new IllegalArgumentException("No se puede modificar el programa porque no existe");
         }
 
-        if (isScheduleOverlapping(id, programDTO)) {
+        ProgramTV existingProgram = existingProgramOpt.get();
+
+        // Verificar si el horario del programa se solapa con otro programa del mismo canal
+        if (isScheduleOverlapping(existingProgram.getChannelId(), programDTO.getSchedule())) {
             throw new IllegalArgumentException("No se puede modificar el programa porque hay un solapamiento de horario en el mismo canal");
         }
 
-        ProgramTV existingProgram = programTVRepository.findById(id).orElse(null);
-        if (existingProgram != null) {
-            existingProgram.setName(programDTO.getName());
-            existingProgram.setSchedule(programDTO.getSchedule());
-            existingProgram.setDay(programDTO.getDay());
-            existingProgram.setDuration(programDTO.getDuration());
-
-            programTVRepository.save(existingProgram);
+        // Verificar si el programa que se está modificando se encuentra justo en el horario que se está ejecutando
+        if (isProgramRunning(existingProgram)) {
+            throw new IllegalArgumentException("No se puede modificar el programa porque se está ejecutando en este momento");
         }
+
+        // Actualizar los atributos del programa
+        existingProgram.setName(programDTO.getName());
+        existingProgram.setSchedule(programDTO.getSchedule());
+        existingProgram.setDay(programDTO.getDay());
+        existingProgram.setDuration(programDTO.getDuration());
+
+        programTVRepository.save(existingProgram);
+    }
+
+    private boolean isScheduleOverlapping(Long channelId, String newSchedule) {
+        // Get all programs for the given channel
+        List<ProgramTV> programs = programTVRepository.findByChannelId(channelId);
+        
+        // Parse the new schedule string to LocalDateTime
+        LocalDateTime newStartTime = LocalDateTime.parse(newSchedule, DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
+
+        for (ProgramTV program : programs) {
+            // Parse the existing program's schedule string to LocalDateTime
+            LocalDateTime existingStartTime = LocalDateTime.parse(program.getSchedule(), DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
+            
+            // Check if the new schedule overlaps with any existing program's schedule
+            if (newStartTime.toLocalTime().isBefore(existingStartTime.plusHours(program.getDuration()).toLocalTime()) &&
+                existingStartTime.toLocalTime().isBefore(newStartTime.plusHours(1).toLocalTime())) {
+                return true; // There is an overlap
+            }
+        }
+        
+        return false; // No overlap found
+    }
+    
+    
+    
+
+    private boolean isProgramRunning(ProgramTV program) {
+        // Parse the program's schedule string to LocalDateTime
+        LocalDateTime programStartTime = LocalDateTime.parse(program.getSchedule(), DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
+        LocalDateTime programEndTime = programStartTime.plusHours(program.getDuration());
+        
+        // Get the current time
+        LocalDateTime currentTime = LocalDateTime.now();
+        
+        // Check if the current time falls within the program's schedule
+        return (currentTime.isAfter(programStartTime) || currentTime.isEqual(programStartTime)) &&
+               currentTime.isBefore(programEndTime);
     }
 
     public void deleteProgram(Long id) {
         if (!programTVRepository.existsById(id)) {
-            throw new IllegalArgumentException("No se puede eliminar el programa porque no existe");
+            throw new IllegalArgumentException("The program cannot be deleted because it does not exist");
         }
 
         programTVRepository.deleteById(id);
@@ -65,19 +110,31 @@ public class ProgramTVService {
         return programTVRepository.findAll();
     }
 
-    public Optional<ProgramTV> consultProgramsByChannel(Long channelId) {
-        return programTVRepository.findById(channelId);
+    public List<ProgramTV> consultProgramsByChannel(Long channelId) {
+        return programTVRepository.findByChannelId(channelId);
     }
 
     public List<ProgramTV> consultOverlapsByChannel(Long channelId, String startTime, String endTime) {
         return programTVRepository.findProgramsOverlappingByChannel(channelId, startTime, endTime);
     }
 
+    
+    public boolean checkProgramScheduleExists(Long channelId, String schedule) {
+        return programTVRepository.existsByChannelIdAndSchedule(channelId, schedule);
+    }
+    
+    
+    
+    public Optional<ProgramTV> consultProgramByNameAndChannel(Long channelId, String name) {
+        return programTVRepository.findByChannelIdAndName(channelId, name);
+    }
+    
+    
     private boolean isScheduleOverlapping(Long id, ProgramTVDTO programDTO) {
         // Obtener el programa existente con el ID proporcionado
         Optional<ProgramTV> existingProgramOpt = programTVRepository.findById(id);
         if (!existingProgramOpt.isPresent()) {
-            throw new IllegalArgumentException("El programa con el ID proporcionado no existe");
+            throw new IllegalArgumentException("The program with the provided ID does exist");
         }
         ProgramTV existingProgram = existingProgramOpt.get();
 
